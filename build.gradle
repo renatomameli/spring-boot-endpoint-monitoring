@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.mameli'
-version = '1.0.0'
+version = '0.0.1'
 
 repositories {
     mavenCentral()
@@ -35,4 +35,21 @@ test {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/renatomameli/spring-boot-endpoint-monitoring")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.token") ?: System.getenv("TOKEN")
+            }
+        }
+    }
 }
