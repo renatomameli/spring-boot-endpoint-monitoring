@@ -1,0 +1,37 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
+    id("org.springframework.boot") version "3.3.0"
+    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+}
+
+group = 'org.mameli'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+test {
+    useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(17)
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}spring
