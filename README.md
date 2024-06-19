@@ -13,9 +13,8 @@ This project provides a service that fetches all endpoints and their correspondi
 ## Getting Started
 
 ### Prerequisites
-- Java 11 or higher
-- Gradle 6.0 or higher
-- Spring Boot 2.5 or higher
+- Java 17
+- Spring Boot 3.3
 
 ### Installation
 
