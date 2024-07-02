@@ -33,7 +33,14 @@ This project provides a org.mameli.model.service that fetches all endpoints and 
 
 ## Usage
 
-1. Ensure your Spring Boot application is running and the Actuator endpoints are enabled.
+1. Ensure your Spring Boot application is running and the Actuator endpoints are enabled. E.g. in application.yml:
+```
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, mappings
+```
 
 2. Inject the `EndpointMetricsService` into your controller or org.mameli.model.service where you need to fetch the endpoint metrics:
 
@@ -48,7 +55,9 @@ This project provides a org.mameli.model.service that fetches all endpoints and 
     }
     ```
 
-3. Access the metrics via the defined endpoint, e.g., `http://localhost:8080/metrics`.
+3. Scan the configuration of this package: `@ComponentScan(basePackages = ["com.your.packages", "org.mameli"])`
+
+4. Access the metrics via the defined endpoint, e.g., `http://localhost:8080/metrics`.
 
 ## Including in Your Project
 
