@@ -1,4 +1,4 @@
-package model
+package org.mameli.model
 
 data class EndpointMetrics(
     val method: String,

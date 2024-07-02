@@ -1,6 +1,6 @@
 # Endpoint Metrics Service
 
-This project provides a service that fetches all endpoints and their corresponding methods of a Spring Boot application and retrieves metrics for each endpoint using Spring Actuator. The metrics are then compiled into a list and returned, giving an overview of all endpoints and their metrics.
+This project provides a org.mameli.model.service that fetches all endpoints and their corresponding methods of a Spring Boot application and retrieves metrics for each endpoint using Spring Actuator. The metrics are then compiled into a list and returned, giving an overview of all endpoints and their metrics.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -21,8 +21,8 @@ This project provides a service that fetches all endpoints and their correspondi
 1. Clone the repository:
 
     ```sh
-    git clone https://github.com/<your-username>/endpoint-metrics-service.git
-    cd endpoint-metrics-service
+    git clone https://github.com/<your-username>/endpoint-metrics-org.mameli.model.service.git
+    cd endpoint-metrics-org.mameli.model.service
     ```
 
 2. Build the project:
@@ -35,7 +35,7 @@ This project provides a service that fetches all endpoints and their correspondi
 
 1. Ensure your Spring Boot application is running and the Actuator endpoints are enabled.
 
-2. Inject the `EndpointMetricsService` into your controller or service where you need to fetch the endpoint metrics:
+2. Inject the `EndpointMetricsService` into your controller or org.mameli.model.service where you need to fetch the endpoint metrics:
 
     ```kotlin
     @RestController
@@ -69,7 +69,7 @@ To include this project as a dependency in your project, follow these steps:
     }
 
     dependencies {
-        implementation 'com.example:endpoint-metrics-service:1.0.0'
+        implementation 'com.example:endpoint-metrics-org.mameli.model.service:1.0.0'
     }
     ```
 
@@ -87,7 +87,7 @@ Here is an example of how to set up the `build.gradle` file:
 ```groovy
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/your-username/endpoint-metrics-service")
+        url = uri("https://maven.pkg.github.com/your-username/endpoint-metrics-org.mameli.model.service")
         credentials {
             username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
             password = project.findProperty("gpr.token") ?: System.getenv("TOKEN")
@@ -97,5 +97,5 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.example:endpoint-metrics-service:1.0.0'
+    implementation 'com.example:endpoint-metrics-org.mameli.model.service:1.0.0'
 }

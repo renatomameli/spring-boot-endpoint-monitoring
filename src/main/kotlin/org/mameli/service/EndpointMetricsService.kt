@@ -1,10 +1,10 @@
-package service
+package org.mameli.service
 
-import model.EndpointMetrics
+import org.mameli.model.EndpointMetrics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate
 @Service
 class EndpointMetricsService(
     webServerAppCtx: ServletWebServerApplicationContext,
-    @Value("\${spring.application.name}") private val appName: String
+    private val applicationContext: ApplicationContext
 ) {
 
     private val restTemplate = RestTemplate()
@@ -57,7 +57,7 @@ class EndpointMetricsService(
 
     private fun getDispatcherServlet(actuatorMappings: Map<*, *>): List<Map<*, *>>? {
         val contexts = actuatorMappings["contexts"] as Map<*, *>?
-        val applicationContext = contexts?.get(appName) as Map<*, *>?
+        val applicationContext = contexts?.get(applicationContext.id) as Map<*, *>?
         val mappingsData = applicationContext?.get("mappings") as Map<*, *>?
         val dispatcherServlets = mappingsData?.get("dispatcherServlets") as Map<*, *>?
         return dispatcherServlets?.get("dispatcherServlet") as List<Map<*, *>>?
