@@ -1,5 +1,9 @@
 package org.mameli.service
 
+import org.mameli.extension.getByKeyAsList
+import org.mameli.extension.getByKeyAsMap
+import org.mameli.extension.getByKeyAsMapList
+import org.mameli.extension.getByKeyAsStringList
 import org.mameli.model.EndpointMetrics
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,50 +21,73 @@ class EndpointMetricsService(
 
     private val restTemplate = RestTemplate()
     private val port = webServerAppCtx.webServer.port
+    private val actuatorMappingsEndpoint = "http://localhost:$port/actuator/mappings"
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
     fun getEndpointMetrics(): List<EndpointMetrics> {
-        val actuatorMappings = restTemplate.getForObject("http://localhost:$port/actuator/mappings", Map::class.java) ?: return emptyList()
-        return getEndpointMetricsListByActuatorMappings(actuatorMappings)
+        try {
+            val actuatorMappings = restTemplate.getForObject(this.actuatorMappingsEndpoint, Map::class.java)
+            if (actuatorMappings == null) {
+                log.info("No actuator mappings found.")
+                return emptyList()
+            }
+            return this.parseEndpointMetrics(actuatorMappings)
+        } catch (e: Exception) {
+            log.info("Failed to fetch actuator mappings.", e)
+        }
+        return emptyList()
     }
 
-    private fun getEndpointMetricsListByActuatorMappings(actuatorMappings: Map<*, *>): List<EndpointMetrics> {
+    private fun parseEndpointMetrics(actuatorMappings: Map<*, *>): List<EndpointMetrics> {
         val endpointMetricsList = mutableListOf<EndpointMetrics>()
-        val dispatcherServlet = getDispatcherServlet(actuatorMappings)
+        val dispatcherServlet = getDispatcherServletByActuatorMappings(actuatorMappings)
 
         dispatcherServlet?.forEach { mapping ->
-            val details = mapping["details"] as Map<*, *>?
-            val requestMappingConditions = details?.get("requestMappingConditions") as Map<*, *>?
-            val methods = requestMappingConditions?.get("methods") as List<String>?
-            val patterns = requestMappingConditions?.get("patterns") as List<String>?
+            val requestMappingConditions = this.getRequestMappingConditions(mapping)
+            val methods = requestMappingConditions?.getByKeyAsStringList("methods")
+            val patterns = requestMappingConditions?.getByKeyAsStringList("patterns")
 
             methods?.forEach { method ->
                 patterns?.filter { endpoint -> !endpoint.startsWith("/actuator") } // TODO Make configurable
-                    ?.forEach { endpoint ->
-                        try {
-                            val url = "http://localhost:$port/actuator/metrics/http.server.requests?tag=uri:$endpoint,method:$method"
-                            val metrics = restTemplate.getForObject(url, Map::class.java)
-                            endpointMetricsList.add(EndpointMetrics(method, endpoint, metrics?.get("measurements") as List<Map<*, *>>))
-                        } catch (e: HttpClientErrorException.NotFound) {
-                            log.debug("Endpoint: {} with method: {} not found", endpoint, method, e)
-                        } catch (e: HttpClientErrorException) {
-                            log.debug("An error occurred for endpoint: {} and the method: {}", endpoint, method, e)
-                        }
-                }
+                    ?.forEach { endpoint -> fetchAndAddEndpointMetrics(endpointMetricsList, method, endpoint) }
             }
         }
+
         return endpointMetricsList
     }
 
-    private fun getDispatcherServlet(actuatorMappings: Map<*, *>): List<Map<*, *>>? {
-        val contexts = actuatorMappings["contexts"] as Map<*, *>?
-        val applicationContext = contexts?.get(applicationContext.id) as Map<*, *>?
-        val mappingsData = applicationContext?.get("mappings") as Map<*, *>?
-        val dispatcherServlets = mappingsData?.get("dispatcherServlets") as Map<*, *>?
-        return dispatcherServlets?.get("dispatcherServlet") as List<Map<*, *>>?
+    private fun fetchAndAddEndpointMetrics(
+        endpointMetricsList: MutableList<EndpointMetrics>,
+        method: String,
+        endpoint: String
+    ) {
+        try {
+            val url = "http://localhost:$port/actuator/metrics/http.server.requests?tag=uri:$endpoint,method:$method"
+            val metrics = restTemplate.getForObject(url, Map::class.java)
+            val measurements = metrics?.getByKeyAsList("measurements")
+            if (measurements != null) {
+                endpointMetricsList.add(EndpointMetrics(method, endpoint, measurements))
+            }
+        } catch (e: HttpClientErrorException.NotFound) {
+            log.debug("Endpoint: {} with method: {} not found", endpoint, method, e)
+        } catch (e: HttpClientErrorException) {
+            log.debug("An error occurred for endpoint: {} and the method: {}", endpoint, method, e)
+        }
+    }
+
+    private fun getDispatcherServletByActuatorMappings(actuatorMappings: Map<*, *>): List<Map<*, *>>? {
+        return actuatorMappings.getByKeyAsMap("contexts")
+            ?.getByKeyAsMap(applicationContext.id)
+            ?.getByKeyAsMap("mappings")
+            ?.getByKeyAsMap("dispatcherServlets")
+            ?.getByKeyAsMapList("dispatcherServlet")
+    }
+
+    private fun getRequestMappingConditions(actuatorMapping: Map<*, *>): Map<*, *>? {
+        return actuatorMapping.getByKeyAsMap("details")?.getByKeyAsMap("requestMappingConditions")
     }
 
 }
