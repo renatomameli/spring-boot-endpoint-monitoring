@@ -59,11 +59,7 @@ class EndpointMetricsService(
         return endpointMetricsList
     }
 
-    private fun fetchAndAddEndpointMetrics(
-        endpointMetricsList: MutableList<EndpointMetrics>,
-        method: String,
-        endpoint: String
-    ) {
+    private fun fetchAndAddEndpointMetrics(endpointMetricsList: MutableList<EndpointMetrics>, method: String, endpoint: String) {
         try {
             val url = "http://localhost:$port/actuator/metrics/http.server.requests?tag=uri:$endpoint,method:$method"
             val metrics = restTemplate.getForObject(url, Map::class.java)
